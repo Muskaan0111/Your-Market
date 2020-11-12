@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/product_edit"
+        android:title="Edit" />
+    <item
+        android:id="@+id/product_remove"
+        android:title="Remove" />
+
+    <item
+        android:id="@+id/showNumber_picker"
+        android:title="NumberPicker" />
+
+
+</menu>
