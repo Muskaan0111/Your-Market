@@ -8,9 +8,6 @@
         android:id="@+id/product_remove"
         android:title="Remove" />
 
-    <item
-        android:id="@+id/showNumber_picker"
-        android:title="NumberPicker" />
 
 
 </menu>

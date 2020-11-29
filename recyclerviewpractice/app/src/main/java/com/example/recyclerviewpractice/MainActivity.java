@@ -11,21 +11,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.NumberPicker;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.recyclerviewpractice.databinding.ActivityMainBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 private ActivityMainBinding b;
@@ -33,6 +40,9 @@ private ActivityMainBinding b;
     private ArrayList<Product> strings;
     private ProductsAdapter productsAdapter;
     private SearchView searchView;
+    private App getApp;
+    private SharedPreferences sharedPreferences;
+    private Gson gson;
 
 
     @Override
@@ -42,17 +52,133 @@ private ActivityMainBinding b;
         b =  ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
-        setUpItems();
 
 
 
+
+
+        setup();
+        loadPreviousData();
+    }
+
+    private void setup() {
+        getApp = (App) getApplicationContext();
+    }
+
+
+
+    private void saveData() {
+        if(getApp.isOffline()){
+            getApp.showToast(this, "Unable to save. You are offline!");
+            return;
+        }
+
+        getApp.showLoadingDialog(this);
+
+        Inventory inventory = new Inventory(strings);
+
+
+        getApp.db.collection("inventory")
+                .document("products")
+                .set(inventory)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(MainActivity.this, "Saved!", Toast.LENGTH_SHORT).show();
+                        saveLocally();
+
+                        getApp.hideLoadingDialog();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Failed to save on cloud", Toast.LENGTH_SHORT).show();
+                        getApp.hideLoadingDialog();
+                    }
+                });
+    }
+
+
+    private void saveLocally() {
+        SharedPreferences preferences = getSharedPreferences("products_data", MODE_PRIVATE);
+        preferences.edit()
+                .putString("data", new Gson().toJson(strings))
+                .apply();
+    }
+
+    private void loadPreviousData() {
+        SharedPreferences preferences = getSharedPreferences("products_data", MODE_PRIVATE);
+        String jsonData = preferences.getString("data", null);
+
+        if(jsonData != null){
+            strings = new Gson().fromJson(jsonData, new TypeToken<ArrayList<Product>>(){}.getType());
+            setUpItems();
+        }
+        else
+        {fetchFromCloud();}
+    }
+
+    private void fetchFromCloud() {
+        if(getApp.isOffline()){
+            getApp.showToast(this, "Unable to save. You are offline!");
+            return;
+        }
+
+        getApp.showLoadingDialog(this);
+
+
+        getApp.db.collection("inventory")
+                .document("products")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if(documentSnapshot.exists()){
+                            Inventory inventory = documentSnapshot.toObject(Inventory.class);
+                            strings = (ArrayList<Product>) inventory.products;
+                            saveLocally();
+                        } else
+                            strings = new ArrayList<>();
+                        setUpItems();
+                        getApp.hideLoadingDialog();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Failed to save on cloud", Toast.LENGTH_SHORT).show();
+                        getApp.hideLoadingDialog();
+                    }
+                });
+    }
+
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("CHANGES")
+                .setMessage("Save Changes ?")
+                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        saveData();
+                    }
+                })
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                })
+                .show();
     }
 
     private void setUpItems() {
-        strings= new ArrayList<>(Arrays.asList(
-
-
-        ));
+//        strings= new ArrayList<>(Arrays.asList(
+//
+//
+//        ));
 
         productsAdapter = new ProductsAdapter(this,strings);
 
@@ -128,7 +254,7 @@ private ActivityMainBinding b;
         Collections.sort(productsAdapter.visibleProducts, new Comparator<Product>(){
             @Override
             public int compare(Product a, Product b) {
-                return a.name.compareTo(b.name);
+                return a.name.toLowerCase().compareTo(b.name.toLowerCase());
             }
         });
        productsAdapter.notifyDataSetChanged();
@@ -147,7 +273,7 @@ private ActivityMainBinding b;
 
 
     private void showProductEditorDialog() {
-            new EditorDialog()
+            new EditorDialog(EditorDialog.PRODUCT_ADD)
                     .show(this, new Product(), new EditorDialog.OnProductEditedListener() {
                         @Override
                         public void onProductEdited(Product product) {
@@ -229,7 +355,7 @@ private ActivityMainBinding b;
         Product lastProduct = productsAdapter.visibleProducts.get(productsAdapter.lastSelectedItemPosition);
 
 
-        new EditorDialog()
+        new EditorDialog(EditorDialog.PRODUCT_EDIT)
                 .show(this, lastProduct, new EditorDialog.OnProductEditedListener() {
                     @Override
                     public void onProductEdited(Product product) {

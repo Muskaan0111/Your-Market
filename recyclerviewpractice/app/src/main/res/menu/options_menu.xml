@@ -15,7 +15,7 @@
         android:id="@+id/add_item"
         android:icon="@drawable/ic_add"
         android:title="Add new item"
-        app:iconTint="#000"
+        app:iconTint="@color/white"
         app:showAsAction="always"
 
         />
@@ -25,7 +25,7 @@
         android:id="@+id/sort_list"
         android:icon="@drawable/ic_sort"
         android:title="Add new item"
-        app:iconTint="#000"
+        app:iconTint="@color/white"
         app:showAsAction="always"
 
         />

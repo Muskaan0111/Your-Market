@@ -21,6 +21,12 @@ public class EditorDialog {
 
     DialogEditorBinding b;
     private Product product;
+   public int productType;
+    public static final byte PRODUCT_ADD = 0, PRODUCT_EDIT = 1;
+
+    public EditorDialog(int type) {
+        productType = type;
+    }
 
 
     void show(final Context context, final Product product, final OnProductEditedListener listener) {
@@ -34,10 +40,10 @@ public class EditorDialog {
 
         new AlertDialog.Builder(context).setTitle("Your Space")
                 .setView(b.getRoot())
-                .setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
+                .setPositiveButton(productType == PRODUCT_ADD ? "ADD" : "EDIT", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(areProductDetailsValid())
+                        if(areProductDetailsValid(productType))
                             listener.onProductEdited(EditorDialog.this.product);
                         else
                             Toast.makeText(context, "Check Details Again!", Toast.LENGTH_SHORT).show();
@@ -53,9 +59,9 @@ public class EditorDialog {
 
         setupRadioGroup();
 
-
-        
-
+        if (productType == PRODUCT_EDIT) {
+            preFillPreviousDetails();
+        }
 
 
 
@@ -101,7 +107,7 @@ public class EditorDialog {
         }
     }
 
-    private boolean areProductDetailsValid() {
+    private boolean areProductDetailsValid(int type) {
 
 
         String name = b.itemName.getText().toString().trim();
@@ -124,16 +130,25 @@ public class EditorDialog {
                     return false;
 
                 product.startWeightBasedProduct(name,Integer.parseInt(pricePerKg), extractQty(minQty));
-
-
-
+                if (type == PRODUCT_ADD) {
+                    product = new Product(name, Integer.parseInt(pricePerKg), extractQty(minQty));
+                } else {
+                    product.startWeightBasedProduct(name, Integer.parseInt(pricePerKg), extractQty(minQty));
+                }
                 return true;
+
+
+
 
             case R.id.variant_based:
                 String variants = b.variant.getText().toString().trim();
+                if (type == PRODUCT_ADD) {
+                    product = new Product(name);
+                } else {
+                    product.startVariantsBasedProduct(name);
+                }
 
 
-                product.startVariantsBasedProduct(name);
 
                 return areVariantsValid(variants);
 

@@ -5,18 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
 
-    android:background="#f85959"
+    android:background="@color/white"
     android:padding="20dp">
 
     <TextView
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/aclonica"
+        android:fontFamily="serif"
         android:text="Onion"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="normal"
         app:layout_constraintBottom_toBottomOf="@+id/minQty"
         app:layout_constraintEnd_toStartOf="@+id/pricePerKg"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,8 +27,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="80/kg"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:textStyle="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,8 +38,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="1kg"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:textStyle="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pricePerKg" />
 </androidx.constraintlayout.widget.ConstraintLayout>
