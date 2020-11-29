@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/search"
+        android:title="Search"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_search"
+        app:iconTint="@color/white"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <item
+
+        android:id="@+id/add_item"
+        android:icon="@drawable/ic_add"
+        android:title="Add new item"
+        app:iconTint="@color/white"
+        app:showAsAction="always"
+
+        />
+
+    <item
+
+        android:id="@+id/sort_list"
+        android:icon="@drawable/ic_sort"
+        android:title="Add new item"
+        app:iconTint="@color/white"
+        app:showAsAction="always"
+
+        />
+
+
+
+
+</menu>
